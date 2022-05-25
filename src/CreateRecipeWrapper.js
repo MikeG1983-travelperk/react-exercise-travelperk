@@ -6,7 +6,6 @@ import CreateRecipe from "./CreateRecipe";
 export default function CreateRecipeWrapper() {
     return (
         <div>
-            Is it working?
             <CreateRecipeStateProvider>
                 <CreateRecipe/>
             </CreateRecipeStateProvider>

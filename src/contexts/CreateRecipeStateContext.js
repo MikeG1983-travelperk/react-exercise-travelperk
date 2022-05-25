@@ -1,16 +1,17 @@
 import React, {createContext, useState} from "react"
 
 export const CreateRecipeStateContext = createContext("")
+export const CreateRecipeActionsContext = createContext()
 
 export function CreateRecipeStateProvider(props) {
 
     const nameInitialState = ""
     const descriptionInitialState = ""
-    const ingredientsInitialState = [""]
+    const ingredientsInitialState = []
 
-    const [name, setName] = useState(nameInitialState);
-    const [description, setDescription] = useState(descriptionInitialState);
-    const [ingredients, setIngredients] = useState(ingredientsInitialState);
+    const [name, setName] = useState(nameInitialState)
+    const [description, setDescription] = useState(descriptionInitialState)
+    const [ingredients, setIngredients] = useState(ingredientsInitialState)
 
     const updateName = (e) => {
         setName(e.target.value)
@@ -20,9 +21,11 @@ export function CreateRecipeStateProvider(props) {
         setDescription(e.target.value)
     }
 
-    const addIngredient = (e) => {
+    const addIngredient = () => {
+        console.log("addIngredient")
         let theIngredients = ingredients
-        theIngredients.push(e.target.value)
+        console.log("theIngredients= ", theIngredients)
+        theIngredients.push("")
         setIngredients(theIngredients)
     }
 
@@ -32,19 +35,31 @@ export function CreateRecipeStateProvider(props) {
         setIngredients(theIngredients)
     }
 
+    const editIngredient = (ingredientIndex, e) => {
+        let theIngredients = ingredients
+        theIngredients[ingredientIndex] = e.target.value;
+        setIngredients(theIngredients)
+    }
+
     const resetRecipeState = () => {
         setName(nameInitialState)
         setDescription(descriptionInitialState)
         setIngredients(ingredientsInitialState)
     }
 
+
     return (
         <CreateRecipeStateContext.Provider value={{
-            ingredients, addIngredient, removeIngredient,
-            name, updateName,
-            description, updateDescription,
-            resetRecipeState
+            ingredients,
+            name,
+            description
         }}>
+            <CreateRecipeActionsContext.Provider value={{
+                updateName, updateDescription, addIngredient,
+                removeIngredient, editIngredient, resetRecipeState
+            }}>
                 {props.children}
-        </CreateRecipeStateContext.Provider>)
+            </CreateRecipeActionsContext.Provider>
+        </CreateRecipeStateContext.Provider>
+    );
 }
