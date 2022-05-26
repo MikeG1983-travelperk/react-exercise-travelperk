@@ -1,49 +1,85 @@
-import React, {useContext} from "react";
+import React, {useCallback, useContext} from "react";
 import {CreateRecipeActionsContext, CreateRecipeStateContext} from "./contexts/CreateRecipeStateContext";
+import IngredientInputList from "./IngredientInputList";
+import MikeButton from "./MikeButton";
+import styled from 'styled-components';
+import axios from "axios";
+import RecipeCard from "./common/RecipeCard";
 
-export default function CreateRecipe() {
+const CreateRecipeDiv = styled.div`
+  padding: 30px;
+  display: flex;
+  gap: 40px;
+  border: 1px solid royalblue;
+  width: 700px;
+`
+
+const CreateRecipeResponseTextArea = styled.textarea`
+  width: 700px;
+  padding: 30px;
+  resize: none;
+  height: 150px;
+`
+
+export default function CreateRecipe(props) {
     const {
         ingredients,
         name,
         description,
+        createApiResponse,
     } = useContext(CreateRecipeStateContext);
 
     const {
         updateName, updateDescription, addIngredient,
-        removeIngredient, editIngredient, resetRecipeState
+        removeIngredient, editIngredient, resetRecipeState,
+        setCreateApiResponse,
     } = useContext(CreateRecipeActionsContext)
 
-    /* Render an input for each ingredient */
-   const ingredientInputs = []
-    for (let i = 0; i < ingredients.length; i++) {
-        ingredientInputs.push(
-            <label htmlFor={"ingredient" + i}>Ingredient {i}:</label>, <br/>,
-            <input type='text' value={ingredients[i]} id={"ingredient" + i} ingredientindex={i} key="{i}"
-                   onChange={( e)=>{
-                       console.log("change detected")
-                       editIngredient(i, e)
+    const sendCreateRequest = useCallback(async () => {
+        let ingredientsList = ingredients.map((ingredient) => {
+            return {'name': ingredient}
+        })
+        let payload = {
+            name,
+            description,
+            ingredients: ingredientsList
+        }
+        console.log("payload= ", payload)
+        try {
+            const instance = axios.create({
+                baseURL: 'http://localhost:8000/api',
 
-                   }}/>,
-            <br/>
-        )
-    }
+            })
+            const res = await instance.post('/recipe/', payload)
+            const newLine = "\r\n"
+            const successString = "Recipe created successfully: " + newLine
+            if (res.status === 201) {
+                setCreateApiResponse(successString + JSON.stringify(res.data, null, 2))
+            } else {
+                setCreateApiResponse(JSON.stringify(res))
+            }
+
+
+        } catch (error) {
+            console.log(error)
+        }
+    }, [name, description, ingredients])
+
 
     return (
         <div>
-            <label htmlFor='name'>Name: </label><br/>
-            <input type='text' value={name} onChange={updateName} id='name'/>
-            <br/>
-            <br/>
-            <label htmlFor='description'>Description: </label><br/>
-            <input type='text' value={description} onChange={updateDescription} id='description'/>
-            <br/>
-            <br/>
-            <h1>Name: {name}</h1>
-            <h1>Description: {description}</h1>
-            <h1>Ingredients: {JSON.stringify(ingredients)}</h1>
-            {ingredientInputs}
-            <br/>
-            <button onClick={addIngredient}>Add Ingredient</button>
+            <RecipeCard name={name}
+                        description={description}
+                        ingredients={ingredients}
+                        updateNameFunction={updateName}
+                        updateDescriptionFunction={updateDescription}
+                        addIngredientFunction={addIngredient}
+                        updateIngredientFunction={editIngredient}
+                        removeIngredientFunction={removeIngredient}
+                        saveFunction={sendCreateRequest} />
+            <div>
+                <CreateRecipeResponseTextArea readOnly value={createApiResponse}/>
+            </div>
         </div>
     )
 }

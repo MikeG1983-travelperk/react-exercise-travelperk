@@ -8,15 +8,25 @@ import {
 } from "react-router-dom";
 import Home from "./Home.js"
 import CreateRecipeWrapper from "./CreateRecipeWrapper";
+import Navbar from "./Navbar";
+import styled from "styled-components"
+
+const PageWrapper = styled.div`
+  display: flex;
+`;
+
 
 function App() {
     return (
-            <Router>
+        <Router>
+            <PageWrapper>
+                <Navbar/>
                 <Routes>
                     <Route path="/" element={<Home/>}/>
                     <Route path="/create" element={<CreateRecipeWrapper/>}/>
                 </Routes>
-            </Router>
+            </PageWrapper>
+        </Router>
     );
 }
 
